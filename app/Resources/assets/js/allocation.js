@@ -5,7 +5,6 @@
 var school_availability;
 
 $.get("/kontrollpanel/api/assistants", function (data) {
-
 })
 
 function getAvailableDays(assistant) {
@@ -70,6 +69,7 @@ function generateGroupSelect(assistant) {
 $.get("/kontrollpanel/api/schools_and_days", function (data) {
     school_availability = JSON.parse(data);
     generateAllocationTable();
+    generateAvailabilityTable();
 });
 
 /*
@@ -82,7 +82,7 @@ function generateAllocationTable() {
         for (var i in assistants) {
             var assistant = assistants[i];
             var name = assistant.name;
-            $('.allocation_table')
+            $('#allocateStudents')
                 .append($('<tr>')
                     // One column for name
                         .append($('<td>')
@@ -105,14 +105,6 @@ function generateAllocationTable() {
             // Initialize the school selector
             var day_select = $("#".concat(string_remove_space(name)));
             updateAvailableSchools(day_select.val(), name);
-            var school_select = $("#".concat(string_remove_space(name).concat("SchoolSelect")));
-            // Set the school and day that the algorithm chose
-            if(assistant.assignedDay != null) {
-                day_select.val(assistant.assignedDay);
-            }
-            if(assistant.assignedSchool != null) {
-                school_select.val(assistant.assignedSchool);
-            }
         }
     });
 }
@@ -137,4 +129,44 @@ function updateAvailableSchools(day, assistant_name) {
 * */
 function string_remove_space(str) {
     return str.split(' ').join('');
+}
+
+function generateAvailabilityTable() {
+    $.get("/kontrollpanel/api/schools", function(data) {
+        var schools = JSON.parse(data);
+
+        for (var i in schools) {
+            var school = schools[i];
+            var school_name = school.name;
+            var sch_cap=school.capacity[1];
+            $('#availability')
+                //One row for eah school
+                .append($('<tr>')
+                    // One column for school name
+                    .append($('<td>')
+                        .text(school_name)
+                    )
+                    // One column for availability on Mondays
+                    .append($('<td>')
+                        .text('/'+sch_cap.Monday)
+                    )
+                    // One column for availability on Tuesdays
+                    .append($('<td>')
+                        .text('/'+sch_cap.Tuesday)
+                    )
+                    // One column for availability on Wednesdays
+                    .append($('<td>')
+                        .text('/'+sch_cap.Wednesday)
+                    )
+                    // One column for availability on Thursdays
+                    .append($('<td>')
+                        .text('/'+sch_cap.Thursday)
+                    )
+                    // One column for availability on Fridays
+                    .append($('<td>')
+                        .text('/'+sch_cap.Friday)
+                    )
+                );
+        }
+    });
 }
